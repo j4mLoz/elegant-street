@@ -107,8 +107,8 @@ export const TOSTON = {
 };
 
 export const CONTACTO = {
-  whatsappNumero: "573113749498",
-  whatsappVisible: "+57 311 374 9498",
+  whatsappNumero: "573007022596",
+  whatsappVisible: "+57 300 702 2596",
   instagram: "https://www.instagram.com/ele.gantstreet",
   facebook: "https://www.facebook.com/61590255880038",
   usuario: "@Ele.gantstreet",
