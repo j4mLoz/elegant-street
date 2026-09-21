@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useCarrito } from "@/context/CarritoContext";
 import { CONTACTO } from "@/data/menu";
 import { cop } from "@/lib/formato";
+import { formatoNumero, registrarPedido } from "@/lib/pedidosDemo";
 
 type Pago = "efectivo" | "transferencia";
 
@@ -55,10 +56,14 @@ export default function Carrito() {
 
   const [datos, setDatos] = useState<Datos>(VACIO);
   const [errores, setErrores] = useState<Errores>({});
-  // Veces que el cliente tocó "Enviar" con datos incompletos
+  // Veces que el cliente tocó "Confirmar" con datos incompletos
   const [intentos, setIntentos] = useState(0);
+  // Número del pedido recién guardado: mientras exista, se muestra la pantalla de confirmación
+  const [confirmado, setConfirmado] = useState<number | null>(null);
+  const [errorGuardado, setErrorGuardado] = useState(false);
   const botonCerrarRef = useRef<HTMLButtonElement>(null);
   const botonFlotanteRef = useRef<HTMLButtonElement>(null);
+  const confirmacionRef = useRef<HTMLHeadingElement>(null);
   const estabaAbierto = useRef(false);
 
   // Escape cierra, se bloquea el scroll de fondo y el foco viaja al panel
@@ -77,11 +82,19 @@ export default function Carrito() {
     };
   }, [abierto, cerrar]);
 
-  // Al cerrar, el foco regresa al botón flotante
+  // Al cerrar, el foco regresa al botón flotante y la confirmación se descarta
   useEffect(() => {
-    if (estabaAbierto.current && !abierto) botonFlotanteRef.current?.focus();
+    if (estabaAbierto.current && !abierto) {
+      botonFlotanteRef.current?.focus();
+      setConfirmado(null);
+    }
     estabaAbierto.current = abierto;
   }, [abierto]);
+
+  // Al aparecer la confirmación, el foco viaja al número de pedido (útil con lectores de pantalla)
+  useEffect(() => {
+    if (confirmado !== null) confirmacionRef.current?.focus();
+  }, [confirmado]);
 
   const actualizar = <K extends keyof Datos>(campo: K, valor: Datos[K]) => {
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -117,33 +130,35 @@ export default function Carrito() {
       if (intento >= 2) irAlPrimerFaltante(nuevos);
       return;
     }
+
+    // El pedido se guarda en localStorage: desde ahí lo lee el panel /admin
+    const pedido = registrarPedido({
+      cliente: datos.nombre.trim(),
+      telefono: datos.telefono.trim(),
+      direccion: [datos.direccion.trim(), datos.referencias.trim()].filter(Boolean).join(" · "),
+      productos: items.map((i) => ({ nombre: i.nombre, cantidad: i.cantidad, precio: i.precio })),
+      total,
+    });
+
+    if (!pedido) {
+      setErrorGuardado(true);
+      return;
+    }
+
+    setErrorGuardado(false);
     setIntentos(0);
-
-    const lineas = items.map(
-      (i) => `• ${i.cantidad} x ${i.nombre} — ${cop(i.precio * i.cantidad)}`,
-    );
-    const mensaje = [
-      "*Pedido Elegant Street* 🍔",
-      "",
-      ...lineas,
-      "",
-      `*Total:* ${cop(total)} (domicilio aparte)`,
-      "",
-      `*Nombre:* ${datos.nombre.trim()}`,
-      `*Teléfono:* ${datos.telefono.trim()}`,
-      `*Dirección:* ${datos.direccion.trim()}`,
-      datos.referencias.trim()
-        ? `*Barrio / referencias:* ${datos.referencias.trim()}`
-        : null,
-      `*Pago:* ${datos.pago === "efectivo" ? "Efectivo" : "Transferencia"}`,
-      datos.notas.trim() ? `*Notas:* ${datos.notas.trim()}` : null,
-    ]
-      .filter((l): l is string => l !== null)
-      .join("\n");
-
-    const url = `https://wa.me/${CONTACTO.whatsappNumero}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    setErrores({});
+    setDatos(VACIO);
+    vaciar();
+    setConfirmado(pedido.id);
   };
+
+  const enlaceWhatsApp =
+    confirmado !== null
+      ? `https://wa.me/${CONTACTO.whatsappNumero}?text=${encodeURIComponent(
+          `Hola, acabo de hacer el pedido ${formatoNumero(confirmado)} en Elegant Street.`,
+        )}`
+      : "";
 
   return (
     <>
@@ -187,7 +202,15 @@ export default function Carrito() {
             id="carrito-titulo"
             className="font-display text-3xl uppercase tracking-wide"
           >
-            Tu <span className="text-oro">pedido</span>
+            {confirmado !== null ? (
+              <>
+                ¡Pedido <span className="text-oro">listo</span>!
+              </>
+            ) : (
+              <>
+                Tu <span className="text-oro">pedido</span>
+              </>
+            )}
           </h2>
           <button
             ref={botonCerrarRef}
@@ -200,254 +223,323 @@ export default function Carrito() {
           </button>
         </header>
 
-        <form onSubmit={enviar} noValidate className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 overflow-y-auto px-6 py-6">
-            {items.length === 0 ? (
-              <div className="py-16 text-center">
-                <p className="font-display text-3xl uppercase text-hueso/40">
-                  Aún no hay nada
-                </p>
-                <p className="mt-3 font-marker text-lg text-oro">
-                  agrega algo del menú
-                </p>
-                <a
-                  href="#menu"
-                  onClick={cerrar}
-                  className="mt-8 inline-block border-b-2 border-oro pb-1 font-body text-sm font-bold uppercase tracking-[0.25em] text-hueso transition-colors hover:text-oro"
+        {confirmado !== null ? (
+          /* ── Pantalla de confirmación ── */
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div
+              role="status"
+              className="flex flex-1 flex-col items-center justify-center px-8 py-10 text-center"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-20 w-20 items-center justify-center bg-oro text-negro shadow-[6px_6px_0_0_rgba(255,255,255,0.9)]"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-10 w-10"
                 >
-                  Ver el menú
-                </a>
-              </div>
-            ) : (
-              <>
-                <ul className="divide-y divide-hueso/10">
-                  {items.map((i) => (
-                    <li key={i.id} className="py-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="font-body font-bold leading-tight">{i.nombre}</p>
-                        <p className="font-display text-xl tracking-wide text-oro">
-                          {cop(i.precio * i.cantidad)}
-                        </p>
-                      </div>
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="inline-flex items-center border border-hueso/20">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              </span>
+
+              <p className="mt-10 font-body text-xs font-bold uppercase tracking-[0.35em] text-hueso/60">
+                Número de pedido
+              </p>
+              <h3
+                ref={confirmacionRef}
+                tabIndex={-1}
+                className="mt-2 font-display text-8xl leading-none text-oro outline-none"
+              >
+                {formatoNumero(confirmado)}
+              </h3>
+
+              <p className="mt-8 max-w-xs font-body text-xl leading-relaxed">
+                Tu pedido está en camino. Te contactaremos al WhatsApp que dejaste.
+              </p>
+
+              <a
+                href={enlaceWhatsApp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-8 font-body text-sm font-bold uppercase tracking-[0.2em] text-hueso/60 underline decoration-oro decoration-2 underline-offset-4 transition-colors hover:text-oro"
+              >
+                ¿Dudas? Escríbenos por WhatsApp
+              </a>
+            </div>
+
+            <footer className="border-t-2 border-oro bg-negro px-6 py-5">
+              <button
+                type="button"
+                onClick={cerrar}
+                className="w-full bg-oro py-4 font-display text-xl uppercase tracking-widest text-negro transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro"
+              >
+                Seguir en la carta
+              </button>
+            </footer>
+          </div>
+        ) : (
+          <form onSubmit={enviar} noValidate className="flex min-h-0 flex-1 flex-col">
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              {items.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p className="font-display text-3xl uppercase text-hueso/40">
+                    Aún no hay nada
+                  </p>
+                  <p className="mt-3 font-marker text-lg text-oro">
+                    agrega algo del menú
+                  </p>
+                  <a
+                    href="#menu"
+                    onClick={cerrar}
+                    className="mt-8 inline-block border-b-2 border-oro pb-1 font-body text-sm font-bold uppercase tracking-[0.25em] text-hueso transition-colors hover:text-oro"
+                  >
+                    Ver el menú
+                  </a>
+                </div>
+              ) : (
+                <>
+                  <ul className="divide-y divide-hueso/10">
+                    {items.map((i) => (
+                      <li key={i.id} className="py-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-body font-bold leading-tight">{i.nombre}</p>
+                          <p className="font-display text-xl tracking-wide text-oro">
+                            {cop(i.precio * i.cantidad)}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between">
+                          <div className="inline-flex items-center border border-hueso/20">
+                            <button
+                              type="button"
+                              onClick={() => cambiarCantidad(i.id, -1)}
+                              aria-label={`Quitar una unidad de ${i.nombre}`}
+                              className="h-8 w-8 font-display text-lg text-hueso transition-colors hover:bg-oro hover:text-negro"
+                            >
+                              −
+                            </button>
+                            <span className="min-w-8 text-center font-display text-lg tabular-nums">
+                              {i.cantidad}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => cambiarCantidad(i.id, 1)}
+                              aria-label={`Sumar una unidad de ${i.nombre}`}
+                              className="h-8 w-8 font-display text-lg text-hueso transition-colors hover:bg-oro hover:text-negro"
+                            >
+                              +
+                            </button>
+                          </div>
                           <button
                             type="button"
-                            onClick={() => cambiarCantidad(i.id, -1)}
-                            aria-label={`Quitar una unidad de ${i.nombre}`}
-                            className="h-8 w-8 font-display text-lg text-hueso transition-colors hover:bg-oro hover:text-negro"
+                            onClick={() => quitar(i.id)}
+                            className="font-body text-xs font-bold uppercase tracking-[0.2em] text-hueso/50 underline underline-offset-4 transition-colors hover:text-oro"
                           >
-                            −
-                          </button>
-                          <span className="min-w-8 text-center font-display text-lg tabular-nums">
-                            {i.cantidad}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => cambiarCantidad(i.id, 1)}
-                            aria-label={`Sumar una unidad de ${i.nombre}`}
-                            className="h-8 w-8 font-display text-lg text-hueso transition-colors hover:bg-oro hover:text-negro"
-                          >
-                            +
+                            Quitar
                           </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => quitar(i.id)}
-                          className="font-body text-xs font-bold uppercase tracking-[0.2em] text-hueso/50 underline underline-offset-4 transition-colors hover:text-oro"
-                        >
-                          Quitar
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
 
-                <button
-                  type="button"
-                  onClick={vaciar}
-                  className="mt-2 font-body text-xs uppercase tracking-[0.2em] text-hueso/40 underline underline-offset-4 transition-colors hover:text-oro"
-                >
-                  Vaciar pedido
-                </button>
+                  <button
+                    type="button"
+                    onClick={vaciar}
+                    className="mt-2 font-body text-xs uppercase tracking-[0.2em] text-hueso/40 underline underline-offset-4 transition-colors hover:text-oro"
+                  >
+                    Vaciar pedido
+                  </button>
 
-                {/* Datos de entrega */}
-                <fieldset
-                  className={`mt-8 space-y-4 border-t border-hueso/10 pt-6 ${
-                    mostrarPista ? "pista-datos" : ""
-                  }`}
-                >
-                  <legend className="mb-2 font-display text-2xl uppercase tracking-wide">
-                    Datos de <span className="text-oro">entrega</span>
-                  </legend>
+                  {/* Datos de entrega */}
+                  <fieldset
+                    className={`mt-8 space-y-4 border-t border-hueso/10 pt-6 ${
+                      mostrarPista ? "pista-datos" : ""
+                    }`}
+                  >
+                    <legend className="mb-2 font-display text-2xl uppercase tracking-wide">
+                      Datos de <span className="text-oro">entrega</span>
+                    </legend>
 
-                  <div>
-                    <label htmlFor="c-nombre" className="mb-1 block font-body text-sm font-semibold">
-                      Nombre
-                    </label>
-                    <input
-                      id="c-nombre"
-                      value={datos.nombre}
-                      onChange={(e) => actualizar("nombre", e.target.value)}
-                      autoComplete="name"
-                      aria-invalid={!!errores.nombre}
-                      aria-describedby={errores.nombre ? "e-nombre" : undefined}
-                      className={CAMPO}
-                      placeholder="¿Cómo te llamas?"
-                    />
-                    {errores.nombre && (
-                      <p id="e-nombre" role="alert" className="mt-1 text-sm font-semibold text-red-400">
-                        {errores.nombre}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label htmlFor="c-telefono" className="mb-1 block font-body text-sm font-semibold">
-                      Teléfono
-                    </label>
-                    <input
-                      id="c-telefono"
-                      type="tel"
-                      inputMode="tel"
-                      value={datos.telefono}
-                      onChange={(e) => actualizar("telefono", e.target.value)}
-                      autoComplete="tel"
-                      aria-invalid={!!errores.telefono}
-                      aria-describedby={errores.telefono ? "e-telefono" : undefined}
-                      className={CAMPO}
-                      placeholder="311 000 0000"
-                    />
-                    {errores.telefono && (
-                      <p id="e-telefono" role="alert" className="mt-1 text-sm font-semibold text-red-400">
-                        {errores.telefono}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label htmlFor="c-direccion" className="mb-1 block font-body text-sm font-semibold">
-                      Dirección
-                    </label>
-                    <input
-                      id="c-direccion"
-                      value={datos.direccion}
-                      onChange={(e) => actualizar("direccion", e.target.value)}
-                      autoComplete="street-address"
-                      aria-invalid={!!errores.direccion}
-                      aria-describedby={errores.direccion ? "e-direccion" : undefined}
-                      className={CAMPO}
-                      placeholder="Calle, número, apto"
-                    />
-                    {errores.direccion && (
-                      <p id="e-direccion" role="alert" className="mt-1 text-sm font-semibold text-red-400">
-                        {errores.direccion}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label htmlFor="c-referencias" className="mb-1 block font-body text-sm font-semibold">
-                      Barrio o referencias <span className="font-normal text-hueso/40">(opcional)</span>
-                    </label>
-                    <input
-                      id="c-referencias"
-                      value={datos.referencias}
-                      onChange={(e) => actualizar("referencias", e.target.value)}
-                      className={CAMPO}
-                      placeholder="Cerca de..., portón negro"
-                    />
-                  </div>
-
-                  <div role="radiogroup" aria-label="Método de pago">
-                    <p className="mb-2 font-body text-sm font-semibold">Método de pago</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(["efectivo", "transferencia"] as const).map((p) => (
-                        <label
-                          key={p}
-                          className={`cursor-pointer border px-3 py-3 text-center font-display text-lg uppercase tracking-wide transition-colors ${
-                            datos.pago === p
-                              ? "border-oro bg-oro text-negro"
-                              : "border-hueso/20 text-hueso hover:border-oro"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="pago"
-                            value={p}
-                            checked={datos.pago === p}
-                            onChange={() => actualizar("pago", p)}
-                            className="sr-only"
-                          />
-                          {p === "efectivo" ? "Efectivo" : "Transferencia"}
-                        </label>
-                      ))}
+                    <div>
+                      <label htmlFor="c-nombre" className="mb-1 block font-body text-sm font-semibold">
+                        Nombre
+                      </label>
+                      <input
+                        id="c-nombre"
+                        value={datos.nombre}
+                        onChange={(e) => actualizar("nombre", e.target.value)}
+                        autoComplete="name"
+                        aria-invalid={!!errores.nombre}
+                        aria-describedby={errores.nombre ? "e-nombre" : undefined}
+                        className={CAMPO}
+                        placeholder="¿Cómo te llamas?"
+                      />
+                      {errores.nombre && (
+                        <p id="e-nombre" role="alert" className="mt-1 text-sm font-semibold text-red-400">
+                          {errores.nombre}
+                        </p>
+                      )}
                     </div>
-                  </div>
 
-                  <div>
-                    <label htmlFor="c-notas" className="mb-1 block font-body text-sm font-semibold">
-                      Notas <span className="font-normal text-hueso/40">(opcional)</span>
-                    </label>
-                    <textarea
-                      id="c-notas"
-                      rows={2}
-                      value={datos.notas}
-                      onChange={(e) => actualizar("notas", e.target.value)}
-                      className={`${CAMPO} resize-none`}
-                      placeholder="Sin cebolla, extra servilletas..."
-                    />
-                  </div>
-                </fieldset>
-              </>
-            )}
-          </div>
+                    <div>
+                      <label htmlFor="c-telefono" className="mb-1 block font-body text-sm font-semibold">
+                        Teléfono
+                      </label>
+                      <input
+                        id="c-telefono"
+                        type="tel"
+                        inputMode="tel"
+                        value={datos.telefono}
+                        onChange={(e) => actualizar("telefono", e.target.value)}
+                        autoComplete="tel"
+                        aria-invalid={!!errores.telefono}
+                        aria-describedby={errores.telefono ? "e-telefono" : undefined}
+                        className={CAMPO}
+                        placeholder="311 000 0000"
+                      />
+                      {errores.telefono && (
+                        <p id="e-telefono" role="alert" className="mt-1 text-sm font-semibold text-red-400">
+                          {errores.telefono}
+                        </p>
+                      )}
+                    </div>
 
-          {/* Total y envío */}
-          <footer className="relative border-t-2 border-oro bg-negro px-6 py-5">
-            {/* Anuncio para lectores de pantalla */}
-            <p role="status" className="sr-only">
-              {mostrarPista
-                ? "Faltan datos de entrega. Completa nombre, teléfono y dirección para enviar tu pedido."
-                : ""}
-            </p>
+                    <div>
+                      <label htmlFor="c-direccion" className="mb-1 block font-body text-sm font-semibold">
+                        Dirección
+                      </label>
+                      <input
+                        id="c-direccion"
+                        value={datos.direccion}
+                        onChange={(e) => actualizar("direccion", e.target.value)}
+                        autoComplete="street-address"
+                        aria-invalid={!!errores.direccion}
+                        aria-describedby={errores.direccion ? "e-direccion" : undefined}
+                        className={CAMPO}
+                        placeholder="Calle, número, apto"
+                      />
+                      {errores.direccion && (
+                        <p id="e-direccion" role="alert" className="mt-1 text-sm font-semibold text-red-400">
+                          {errores.direccion}
+                        </p>
+                      )}
+                    </div>
 
-            {/* Flecha guía: aparece sobre el total desde el 2.º clic, sin tapar los campos */}
-            {mostrarPista && (
-              <div className="mb-4 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => irAlPrimerFaltante(validar(datos))}
-                  className="flecha-sube flex items-center gap-2 bg-oro px-4 py-2 font-display text-lg uppercase tracking-wide text-negro shadow-[4px_4px_0_0_rgba(255,255,255,0.9)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro"
-                >
-                  <span aria-hidden="true" className="text-2xl leading-none">
-                    ↑
-                  </span>
-                  Completa tus datos de entrega
-                </button>
-              </div>
-            )}
+                    <div>
+                      <label htmlFor="c-referencias" className="mb-1 block font-body text-sm font-semibold">
+                        Barrio o referencias <span className="font-normal text-hueso/40">(opcional)</span>
+                      </label>
+                      <input
+                        id="c-referencias"
+                        value={datos.referencias}
+                        onChange={(e) => actualizar("referencias", e.target.value)}
+                        className={CAMPO}
+                        placeholder="Cerca de..., portón negro"
+                      />
+                    </div>
 
-            <div className="flex items-baseline justify-between">
-              <span className="font-body text-sm font-bold uppercase tracking-[0.25em] text-hueso/60">
-                Total
-              </span>
-              <span className="font-display text-4xl tracking-wide text-oro">
-                {cop(total)}
-              </span>
+                    <div role="radiogroup" aria-label="Método de pago">
+                      <p className="mb-2 font-body text-sm font-semibold">Método de pago</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(["efectivo", "transferencia"] as const).map((p) => (
+                          <label
+                            key={p}
+                            className={`cursor-pointer border px-3 py-3 text-center font-display text-lg uppercase tracking-wide transition-colors ${
+                              datos.pago === p
+                                ? "border-oro bg-oro text-negro"
+                                : "border-hueso/20 text-hueso hover:border-oro"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="pago"
+                              value={p}
+                              checked={datos.pago === p}
+                              onChange={() => actualizar("pago", p)}
+                              className="sr-only"
+                            />
+                            {p === "efectivo" ? "Efectivo" : "Transferencia"}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="c-notas" className="mb-1 block font-body text-sm font-semibold">
+                        Notas <span className="font-normal text-hueso/40">(opcional)</span>
+                      </label>
+                      <textarea
+                        id="c-notas"
+                        rows={2}
+                        value={datos.notas}
+                        onChange={(e) => actualizar("notas", e.target.value)}
+                        className={`${CAMPO} resize-none`}
+                        placeholder="Sin cebolla, extra servilletas..."
+                      />
+                    </div>
+                  </fieldset>
+                </>
+              )}
             </div>
-            <p className="mt-1 font-body text-xs text-hueso/50">
-              El domicilio se confirma por WhatsApp.
-            </p>
-            <button
-              type="submit"
-              disabled={items.length === 0}
-              className="mt-4 w-full bg-oro py-4 font-display text-xl uppercase tracking-widest text-negro transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              Enviar pedido por WhatsApp
-            </button>
-          </footer>
-        </form>
+
+            {/* Total y confirmación */}
+            <footer className="relative border-t-2 border-oro bg-negro px-6 py-5">
+              {/* Anuncio para lectores de pantalla */}
+              <p role="status" className="sr-only">
+                {mostrarPista
+                  ? "Faltan datos de entrega. Completa nombre, teléfono y dirección para confirmar tu pedido."
+                  : ""}
+              </p>
+
+              {/* Flecha guía: aparece sobre el total desde el 2.º clic, sin tapar los campos */}
+              {mostrarPista && (
+                <div className="mb-4 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => irAlPrimerFaltante(validar(datos))}
+                    className="flecha-sube flex items-center gap-2 bg-oro px-4 py-2 font-display text-lg uppercase tracking-wide text-negro shadow-[4px_4px_0_0_rgba(255,255,255,0.9)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro"
+                  >
+                    <span aria-hidden="true" className="text-2xl leading-none">
+                      ↑
+                    </span>
+                    Completa tus datos de entrega
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-baseline justify-between">
+                <span className="font-body text-sm font-bold uppercase tracking-[0.25em] text-hueso/60">
+                  Total
+                </span>
+                <span className="font-display text-4xl tracking-wide text-oro">
+                  {cop(total)}
+                </span>
+              </div>
+              <p className="mt-1 font-body text-xs text-hueso/50">
+                El domicilio se confirma por WhatsApp.
+              </p>
+
+              {errorGuardado && (
+                <p role="alert" className="mt-3 text-sm font-semibold text-red-400">
+                  No pudimos registrar tu pedido en este navegador. Inténtalo de nuevo o escríbenos
+                  por WhatsApp.
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={items.length === 0}
+                className="mt-4 w-full bg-oro py-4 font-display text-xl uppercase tracking-widest text-negro transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                Confirmar pedido
+              </button>
+            </footer>
+          </form>
+        )}
       </aside>
     </>
   );
