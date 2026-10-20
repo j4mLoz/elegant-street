@@ -1,115 +1,55 @@
 export type Producto = {
+  /** Debe coincidir con el id de la tabla public.productos */
   id: string;
   nombre: string;
   descripcion: string;
-  /** Pesos colombianos, entero */
+  /** Precio de respaldo en pesos. El precio real lo da Supabase. */
   precio: number;
+  /** Foto en /public. Para cambiarla, reemplaza el archivo con el mismo nombre. */
+  foto: string;
+  fotoAlt: string;
+  /** Frase corta en letra de brocha */
+  nota: string;
 };
 
-export type Extra = {
-  id: string;
-  nombre: string;
-  precio: number;
-};
-
-export const HAMBURGUESAS: Producto[] = [
-  {
-    id: "street-paulista",
-    nombre: "Street Paulista",
-    descripcion:
-      "Pan brioche, verduras, carne artesanal premium, tocineta ahumada, queso cheddar, papas a la francesa.",
-    precio: 26000,
-  },
-  {
-    id: "street-gaucha",
-    nombre: "Street Gaucha",
-    descripcion:
-      "Pan brioche, verduras, doble carne artesanal premium, tocineta ahumada, queso cheddar, papas a la francesa.",
-    precio: 32000,
-  },
+export const PRODUCTOS: Producto[] = [
   {
     id: "street-carioca",
     nombre: "Street Carioca",
     descripcion:
-      "Pan brioche, verduras, carne artesanal premium, mermelada de tocineta, queso crema.",
+      "Pan brioche, lechuga, tomate, carne premium, mermelada de tocineta, queso cheddar, queso crema y salsa de la casa.",
     precio: 30000,
+    foto: "/productos/street-carioca.jpg",
+    fotoAlt:
+      "Street Carioca: hamburguesa en pan brioche con lechuga, carne, queso cheddar y mermelada de tocineta",
+    nota: "la clásica",
+  },
+  {
+    id: "street-abacaxi",
+    nombre: "Street Abacaxi",
+    descripcion:
+      "Pan brioche, lechuga, tomate, piña asada, carne premium, queso derretido, queso crema y salsa de la casa.",
+    precio: 30000,
+    foto: "/productos/street-abacaxi.jpg",
+    fotoAlt:
+      "Street Abacaxi: hamburguesa en pan brioche con piña asada, queso derretido y queso crema",
+    nota: "con piña asada",
   },
 ];
 
-export const SALCHIPAPAS: Producto[] = [
-  {
-    id: "street-ranchera",
-    nombre: "Street Ranchera",
-    descripcion:
-      "Papas a la francesa, salchicha ranchera, tocineta ahumada, maduritos, queso mozzarella.",
-    precio: 28000,
-  },
-  {
-    id: "street-honey",
-    nombre: "Street Honey",
-    descripcion:
-      "Papas a la francesa, salchicha zenú, tocineta ahumada, pollo bañado en miel, maicitos, queso mozzarella.",
-    precio: 28000,
-  },
-  {
-    id: "street-mex",
-    nombre: "Street Mex",
-    descripcion:
-      "Papas a la francesa, guacamole, pico e' gallo, carne desmechada, pollo desmechado, queso mozzarella.",
-    precio: 28000,
-  },
-  {
-    id: "street-classic",
-    nombre: "Street Classic",
-    descripcion:
-      "Papas a la francesa, salchicha zenú, tocineta, queso cheddar.",
-    precio: 22000,
-  },
-];
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMERO || "573113749498";
 
-export const ADICIONES: Extra[] = [
-  { id: "add-carne-artesanal", nombre: "Carne artesanal", precio: 6000 },
-  { id: "add-tocineta-ahumada", nombre: "Tocineta ahumada", precio: 5000 },
-  { id: "add-queso-cheddar", nombre: "Queso cheddar", precio: 4000 },
-  {
-    id: "add-mermelada-tocineta",
-    nombre: "Mermelada de tocineta",
-    precio: 6000,
-  },
-  { id: "add-papas-francesa", nombre: "Papas a la francesa", precio: 6000 },
-  { id: "add-salchicha-ranchera", nombre: "Salchicha ranchera", precio: 5000 },
-  { id: "add-salchicha-zenu", nombre: "Salchicha zenú", precio: 4000 },
-  { id: "add-pollo-desmechado", nombre: "Pollo desmechado", precio: 5000 },
-  { id: "add-carne-desmechada", nombre: "Carne desmechada", precio: 6000 },
-  { id: "add-maduros", nombre: "Maduros", precio: 3000 },
-  { id: "add-guacamole", nombre: "Guacamole", precio: 4000 },
-];
-
-export const PRECIO_SALSA = 2500;
-
-export const SALSAS: Extra[] = [
-  { id: "salsa-bbq-dulce", nombre: "BBQ Dulce", precio: PRECIO_SALSA },
-  { id: "salsa-dulce-maiz", nombre: "Dulce Maíz", precio: PRECIO_SALSA },
-  {
-    id: "salsa-mayo-cilantro",
-    nombre: "Mayonesa Cilantro",
-    precio: PRECIO_SALSA,
-  },
-  { id: "salsa-mayo-relish", nombre: "Mayonesa Relish", precio: PRECIO_SALSA },
-];
-
-export const TOSTON = {
-  id: "toston-queso",
-  nombre: "Tostón de queso",
-  precio: 7900,
-  /** Costo extra si se pide con tocineta */
-  extraTocineta: 1900,
-};
+/** "573113749498" -> "311 374 9498" */
+function visible(numero: string): string {
+  const local = numero.startsWith("57") ? numero.slice(2) : numero;
+  return local.replace(/^(\d{3})(\d{3})(\d+)$/, "$1 $2 $3");
+}
 
 export const CONTACTO = {
-  whatsappNumero: "573007022596",
-  whatsappVisible: "+57 300 702 2596",
+  whatsappNumero: WHATSAPP,
+  whatsappVisible: visible(WHATSAPP),
   instagram: "https://www.instagram.com/ele.gantstreet",
   facebook: "https://www.facebook.com/61590255880038",
-  usuario: "@Ele.gantstreet",
+  usuario: "@ele.gantstreet",
+  zona: "Unidad Siempre Verde",
 };

@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# La plantilla de variables sí se versiona
+!.env.example
+
+# Netlify local
+.netlify
+
+# Capturas de las pruebas
+tests/capturas

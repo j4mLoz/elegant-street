@@ -30,7 +30,7 @@ export default function Historia() {
       {/* Número gigante de fondo */}
       <span
         aria-hidden="true"
-        className="texto-contorno-oro pointer-events-none absolute -left-4 top-6 -z-10 select-none font-display text-[clamp(10rem,38vw,34rem)] leading-none opacity-[0.16] sm:left-4"
+        className="texto-contorno-oro pointer-events-none absolute -left-4 top-6 -z-10 select-none font-display font-extrabold text-[clamp(8rem,34vw,28rem)] leading-none opacity-[0.16] sm:left-4"
       >
         2026
       </span>
@@ -43,10 +43,10 @@ export default function Historia() {
               <span aria-hidden="true" className="h-[2px] w-12 bg-oro" />
               Nuestra historia
             </p>
-            <h2 className="font-display text-[clamp(3.2rem,9vw,7rem)] uppercase leading-[0.88]">
+            <h2 className="font-display font-extrabold text-[clamp(2.8rem,11vw,6rem)] uppercase leading-[0.88]">
               Nacimos
               <br />
-              <span className="text-oro">con ritmo</span>
+              <span className="texto-contorno">con ritmo</span>
             </h2>
             <p className="mt-6 -rotate-2 font-marker text-2xl text-hueso/70 sm:text-3xl">
               y con la pelota pegada al pie.
@@ -68,10 +68,10 @@ export default function Historia() {
             </Revela>
             <Revela retraso={300}>
               <p className="border-l-4 border-oro pl-6 font-body text-lg leading-relaxed text-hueso/75">
-                Llevamos esa energía de calle a una cocina oculta colombiana,
-                donde cada hamburguesa y cada salchipapa se arma como una
-                jugada: con técnica, con sabor y con la actitud de quien sabe
-                que lo bueno no necesita gritar para que lo encuentren.
+                Llevamos esa energía de calle a una cocina oculta, donde cada
+                hamburguesa se arma como una jugada: con técnica, con sabor y
+                con la actitud de quien sabe que lo bueno no necesita gritar
+                para que lo encuentren. Buena comida, buena gente.
               </p>
             </Revela>
           </div>
@@ -83,10 +83,10 @@ export default function Historia() {
             <li key={p.numero} className="bg-negro">
               <Revela retraso={i * 150} className="group h-full">
                 <article className="relative h-full p-8 transition-colors duration-500 hover:bg-grafito sm:p-10">
-                  <span className="font-display text-6xl text-oro/25 transition-colors duration-500 group-hover:text-oro">
+                  <span className="font-display font-extrabold text-6xl text-oro/25 transition-colors duration-500 group-hover:text-oro">
                     {p.numero}
                   </span>
-                  <h3 className="mt-4 font-display text-4xl uppercase tracking-wide">
+                  <h3 className="mt-4 font-display font-extrabold text-4xl uppercase tracking-wide">
                     {p.titulo}
                   </h3>
                   <p className="mt-3 font-body leading-relaxed text-hueso/65">

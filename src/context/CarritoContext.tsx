@@ -34,9 +34,11 @@ type CarritoCtx = {
 };
 
 const LLAVE = "elegant-street-carrito";
+/** Máximo por producto (la base de datos también lo exige) */
+export const MAXIMO_POR_PRODUCTO = 10;
 const Contexto = createContext<CarritoCtx | null>(null);
 
-function leerGuardado(): ItemCarrito[] {
+function leerGuardado(validos: Record<string, number>): ItemCarrito[] {
   try {
     const crudo = localStorage.getItem(LLAVE);
     if (!crudo) return [];
@@ -48,23 +50,31 @@ function leerGuardado(): ItemCarrito[] {
         typeof i?.nombre === "string" &&
         Number.isFinite(i?.precio) &&
         Number.isInteger(i?.cantidad) &&
-        i.cantidad > 0,
-    );
+        i.cantidad > 0 &&
+        i.id in validos,
+    ).map((i) => ({ ...i, precio: validos[i.id], cantidad: Math.min(i.cantidad, MAXIMO_POR_PRODUCTO) }));
   } catch {
     return [];
   }
 }
 
-export function CarritoProvider({ children }: { children: ReactNode }) {
+export function CarritoProvider({
+  children,
+  precios,
+}: {
+  children: ReactNode;
+  /** id -> precio vigente. Solo estos productos se pueden pedir. */
+  precios: Record<string, number>;
+}) {
   const [items, setItems] = useState<ItemCarrito[]>([]);
   const [abierto, setAbierto] = useState(false);
   const [hidratado, setHidratado] = useState(false);
 
   // Se lee después de montar para no desalinear el HTML del servidor
   useEffect(() => {
-    setItems(leerGuardado());
+    setItems(leerGuardado(precios));
     setHidratado(true);
-  }, []);
+  }, [precios]);
 
   useEffect(() => {
     if (!hidratado) return;
@@ -80,7 +90,9 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       const existe = actual.some((i) => i.id === nuevo.id);
       return existe
         ? actual.map((i) =>
-            i.id === nuevo.id ? { ...i, cantidad: i.cantidad + 1 } : i,
+            i.id === nuevo.id
+              ? { ...i, cantidad: Math.min(i.cantidad + 1, MAXIMO_POR_PRODUCTO) }
+              : i,
           )
         : [...actual, { ...nuevo, cantidad: 1 }];
     });
@@ -89,7 +101,11 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   const cambiarCantidad = useCallback((id: string, delta: number) => {
     setItems((actual) =>
       actual
-        .map((i) => (i.id === id ? { ...i, cantidad: i.cantidad + delta } : i))
+        .map((i) =>
+          i.id === id
+            ? { ...i, cantidad: Math.min(i.cantidad + delta, MAXIMO_POR_PRODUCTO) }
+            : i,
+        )
         .filter((i) => i.cantidad > 0),
     );
   }, []);

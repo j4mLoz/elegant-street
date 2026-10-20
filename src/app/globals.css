@@ -2,43 +2,27 @@
 
 /* ───────────────────────────────────────────────
    ELEGANT STREET — sistema visual
-   Negro calle · Oro joga bonito · Blanco cal
+   Negro calle · Blanco hueso · Letra de brocha
    ─────────────────────────────────────────────── */
 
 @theme inline {
-  --color-negro: #0a0a0a;
-  --color-carbon: #131313;
-  --color-grafito: #1c1c1c;
-  --color-oro: #c0c0c0;
-  --color-oro-vivo: #e0bf5f;
+  /* Blanco y negro, como el logo y el flyer. "oro" quedó como nombre del
+     acento por compatibilidad: ahora es el blanco hueso de la marca. */
+  --color-negro: #0d0d0d;
+  --color-carbon: #151515;
+  --color-grafito: #222222;
+  --color-oro: #f6f5f3;
   --color-hueso: #ffffff;
+  --color-alerta: #ff8a80;
 
-  /* Paleta semántica del panel /admin: sus valores cambian con .tema-claro / .tema-oscuro */
-  --color-p-fondo: var(--p-fondo);
-  --color-p-panel: var(--p-panel);
-  --color-p-hover: var(--p-hover);
-  --color-p-texto: var(--p-texto);
-  --color-p-acento: var(--p-acento);
-  --color-p-sobre-acento: var(--p-sobre-acento);
-  --color-p-plata: var(--p-plata);
-  --color-p-plata-texto: var(--p-plata-texto);
-  --color-p-ok: var(--p-ok);
-  --color-p-alerta: var(--p-alerta);
-  --color-p-info: var(--p-info);
-  --color-p-peligro: var(--p-peligro);
-  --color-p-ok-solido: var(--p-ok-solido);
-  --color-p-alerta-solido: var(--p-alerta-solido);
-  --color-p-info-solido: var(--p-info-solido);
-  --color-p-peligro-solido: var(--p-peligro-solido);
-
-  --font-display: var(--nf-anton), "Impact", sans-serif;
-  --font-body: var(--nf-archivo), system-ui, sans-serif;
+  --font-display: var(--nf-outfit), system-ui, sans-serif;
+  --font-body: var(--nf-jakarta), system-ui, sans-serif;
   --font-marker: var(--nf-marker), cursive;
 }
 
 :root {
-  --negro: #0a0a0a;
-  --oro: #c0c0c0;
+  --negro: #0d0d0d;
+  --oro: #f6f5f3;
 }
 
 html {
@@ -61,8 +45,11 @@ body {
 
 /* ── Texto en contorno (tipo stencil de calle) ── */
 .texto-contorno {
-  color: transparent;
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.92);
+  /* El relleno (color del fondo) tapa la mitad interna del trazo: así no se
+     ven los cruces internos de las letras. */
+  color: var(--negro);
+  -webkit-text-stroke: 4px rgba(255, 255, 255, 0.95);
+  paint-order: stroke fill;
 }
 .texto-contorno-oro {
   color: transparent;
@@ -80,12 +67,12 @@ body {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.2 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-/* ── Halo dorado detrás del logo ── */
+/* ── Halo claro detrás del logo ── */
 .halo-oro {
   background: radial-gradient(
     closest-side,
-    rgba(201, 168, 76, 0.34),
-    rgba(201, 168, 76, 0.1) 55%,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.05) 55%,
     transparent 75%
   );
 }
@@ -149,52 +136,6 @@ body {
   transform: translateY(0);
 }
 
-/* ── Temas del panel /admin: claro por defecto, oscuro opcional ── */
-.tema-oscuro {
-  --p-fondo: #0a0a0a;
-  --p-panel: #131313;
-  --p-hover: #1c1c1c;
-  --p-texto: #ffffff;
-  --p-acento: #c0c0c0;
-  --p-sobre-acento: #0a0a0a;
-  --p-plata: #c0c0c0;
-  --p-plata-texto: #c0c0c0;
-  --p-sombra: rgba(255, 255, 255, 0.9);
-  --p-ok: #6ee7b7;
-  --p-alerta: #fcd34d;
-  --p-info: #7dd3fc;
-  --p-peligro: #fca5a5;
-  --p-ok-solido: #34d399;
-  --p-alerta-solido: #fbbf24;
-  --p-info-solido: #38bdf8;
-  --p-peligro-solido: #f87171;
-}
-.tema-claro {
-  --p-fondo: #f3f3f0;
-  --p-panel: #ffffff;
-  --p-hover: #efefec;
-  --p-texto: #0a0a0a;
-  --p-acento: #0a0a0a;
-  --p-sobre-acento: #ffffff;
-  --p-plata: #c0c0c0;
-  --p-plata-texto: #6b6b6b;
-  --p-sombra: #c0c0c0;
-  --p-ok: #047857;
-  --p-alerta: #b45309;
-  --p-info: #0369a1;
-  --p-peligro: #b91c1c;
-  --p-ok-solido: #10b981;
-  --p-alerta-solido: #f59e0b;
-  --p-info-solido: #0ea5e9;
-  --p-peligro-solido: #ef4444;
-}
-/* El grano de asfalto pasa a tinta oscura sobre fondo claro */
-.tema-claro.grano::after {
-  filter: invert(1);
-  mix-blend-mode: multiply;
-  opacity: 0.035;
-}
-
 /* ── Pista del carrito: flecha que sube y latido en "Datos de entrega" ── */
 @keyframes flecha-sube {
   0%, 100% { transform: translateY(0); }
@@ -211,7 +152,7 @@ body {
   outline-offset: 10px;
 }
 
-/* ── Botón dorado con brillo que barre ── */
+/* ── Botón claro con brillo que barre ── */
 .btn-oro {
   position: relative;
   overflow: hidden;
@@ -225,7 +166,7 @@ body {
   background: linear-gradient(
     110deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.55) 50%,
+    rgba(13, 13, 13, 0.18) 50%,
     transparent 70%
   );
   transform: translateX(-120%);

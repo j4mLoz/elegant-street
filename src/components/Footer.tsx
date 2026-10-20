@@ -53,21 +53,22 @@ export default function Footer() {
     <footer className="grano relative isolate overflow-hidden border-t-4 border-oro bg-negro px-5 pb-10 pt-20 sm:px-8">
       <span
         aria-hidden="true"
-        className="texto-contorno-oro pointer-events-none absolute inset-x-0 bottom-0 -z-10 select-none text-center font-display text-[clamp(5rem,22vw,20rem)] uppercase leading-[0.75] opacity-[0.12]"
+        className="texto-contorno-oro pointer-events-none absolute inset-x-0 bottom-0 -z-10 select-none text-center font-display font-extrabold text-[clamp(5rem,22vw,20rem)] uppercase leading-[0.75] opacity-[0.12]"
       >
         Elegant
       </span>
 
       <div className="mx-auto grid max-w-7xl gap-14 md:grid-cols-12">
         <div className="md:col-span-5">
-          <p className="font-display text-5xl uppercase leading-[0.9] sm:text-6xl">
+          <p className="font-display font-extrabold text-5xl uppercase leading-[0.9] sm:text-6xl">
             Elegant <span className="text-oro">Street</span>
           </p>
           <p className="mt-4 font-marker text-xl text-hueso/70">
             cocina oculta · est. 2026
           </p>
           <p className="mt-6 max-w-sm font-body text-hueso/60">
-            Sabor colombiano con alma de freestyle y joga bonito.
+            Domicilios en la Unidad Siempre Verde. Viernes, sábado y domingo desde
+            las 4:00 p. m.
           </p>
         </div>
 
@@ -87,7 +88,7 @@ export default function Footer() {
                   <span className="text-oro transition-colors group-hover:text-negro">
                     {r.icono}
                   </span>
-                  <span className="font-display text-2xl uppercase tracking-wide">
+                  <span className="font-display font-extrabold text-2xl uppercase tracking-wide">
                     {r.nombre}
                   </span>
                   <span className="break-all font-body text-sm text-hueso/60 transition-colors group-hover:text-negro/80">

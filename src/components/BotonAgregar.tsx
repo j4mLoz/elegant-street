@@ -1,6 +1,6 @@
 "use client";
 
-import { useCarrito } from "@/context/CarritoContext";
+import { MAXIMO_POR_PRODUCTO, useCarrito } from "@/context/CarritoContext";
 
 type Props = {
   id: string;
@@ -27,7 +27,7 @@ export default function BotonAgregar({ id, nombre, precio, compacto = false }: P
         aria-label={`Agregar ${nombre} al pedido`}
         className={`${
           compacto ? "h-9 px-4 text-sm" : "h-12 px-6 text-lg"
-        } -skew-x-6 bg-oro font-display uppercase tracking-widest text-negro transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro active:translate-y-0`}
+        } -skew-x-6 bg-oro font-display font-extrabold uppercase tracking-widest text-negro transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro active:translate-y-0`}
       >
         <span className="inline-block skew-x-6">Agregar</span>
       </button>
@@ -44,21 +44,22 @@ export default function BotonAgregar({ id, nombre, precio, compacto = false }: P
         type="button"
         onClick={() => cambiarCantidad(id, -1)}
         aria-label={`Quitar una unidad de ${nombre}`}
-        className={`${tamano} font-display text-oro transition-colors hover:bg-oro hover:text-negro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro`}
+        className={`${tamano} font-display font-bold text-oro transition-colors hover:bg-oro hover:text-negro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro`}
       >
         −
       </button>
       <span
         aria-live="polite"
-        className={`${compacto ? "min-w-8 text-lg" : "min-w-10 text-2xl"} text-center font-display tabular-nums`}
+        className={`${compacto ? "min-w-8 text-lg" : "min-w-10 text-2xl"} text-center font-display font-extrabold tabular-nums`}
       >
         {cantidad}
       </span>
       <button
         type="button"
         onClick={() => cambiarCantidad(id, 1)}
+        disabled={cantidad >= MAXIMO_POR_PRODUCTO}
         aria-label={`Sumar una unidad de ${nombre}`}
-        className={`${tamano} font-display text-oro transition-colors hover:bg-oro hover:text-negro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro`}
+        className={`${tamano} font-display font-bold text-oro transition-colors hover:bg-oro hover:text-negro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oro disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-oro`}
       >
         +
       </button>

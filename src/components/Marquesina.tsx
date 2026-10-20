@@ -1,18 +1,17 @@
 const FRASES = [
-  "Joga Bonito",
-  "Freestyle",
-  "Cocina Oculta",
-  "Sabor Colombiano",
+  "Street Carioca",
+  "Street Abacaxi",
+  "La calle también come rico",
+  "Buena comida, buena gente",
   "Est. 2026",
-  "Bajo la mirada del Cristo",
 ];
 
-/** Cinta dorada inclinada que corre sin parar, como cinta de calle. */
+/** Cinta blanca inclinada que corre sin parar, como cinta de calle. */
 export default function Marquesina() {
   return (
     <div
       aria-hidden="true"
-      className="relative z-20 -rotate-[1.6deg] scale-[1.03] overflow-hidden border-y-2 border-negro bg-oro py-3 shadow-[0_0_60px_rgba(201,168,76,0.25)]"
+      className="relative z-20 -rotate-[1.6deg] scale-[1.03] overflow-hidden border-y-2 border-negro bg-oro py-3"
     >
       {/* Dos copias idénticas: al desplazar -50% el bucle no se nota */}
       <div className="marquesina-pista">
@@ -21,10 +20,10 @@ export default function Marquesina() {
             {[...FRASES, ...FRASES].map((frase, i) => (
               <li
                 key={`${copia}-${i}`}
-                className="flex items-center font-display text-2xl uppercase tracking-wider text-negro sm:text-3xl"
+                className="flex items-center font-display text-xl font-extrabold uppercase tracking-wider text-negro sm:text-2xl"
               >
                 <span className="px-6">{frase}</span>
-                <span className="text-xl">✦</span>
+                <span className="text-lg">✦</span>
               </li>
             ))}
           </ul>
