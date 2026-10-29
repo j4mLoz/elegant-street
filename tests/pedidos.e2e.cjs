@@ -56,7 +56,7 @@ async function llenar(page, { nombre, tel, torre, apto, pago = "Efectivo", notas
   // Base limpia
   sql(`truncate public.pedido_items, public.pedidos, public.visitas restart identity cascade;
        delete from public.jornadas where fecha = ${HOY};
-       update public.ajustes set llave_transferencia = '', domicilio = 0;`);
+       update public.ajustes set llave_transferencia = '', domicilio = 0, max_pedidos_por_telefono = 3;`);
 
   const browser = await chromium.launch({ executablePath: EXE });
 
@@ -280,7 +280,7 @@ async function llenar(page, { nombre, tel, torre, apto, pago = "Efectivo", notas
   }
 
   console.log("\n" + sql(`select numero||' '||origen||' '||detalle||' '||total||' '||estado from public.pedidos order by numero`));
-  console.log(sql(`select * from public.resumen_por_origen`));
+  console.log(sql(`select * from public.resumen_por_origen(30)`));
   await browser.close();
   const fallas = resultados.filter((r) => !r.ok).length;
   console.log(`\n${resultados.length - fallas}/${resultados.length} pruebas pasan`);

@@ -1,3 +1,5 @@
+> Esta guía quedó integrada en **ENTREGA-ELEGANT.md** (base única web + panel). Si hay diferencias, manda ENTREGA-ELEGANT.md.
+
 # Publicar la web de pedidos de Elegant Street en Netlify
 
 Son 5 pasos y toman unos 15 minutos. Solo necesitas copiar y pegar.
@@ -19,9 +21,9 @@ Son 5 pasos y toman unos 15 minutos. Solo necesitas copiar y pegar.
 
 1. En el menú de la izquierda abre **SQL Editor**.
 2. Toca **New query**.
-3. Abre el archivo `SQL-PARA-PEGAR.sql` de este repo, copia **todo** y pégalo.
+3. Abre el archivo `SQL-PARA-PEGAR-ELEGANT.sql` de este repo, copia **todo** y pégalo.
 4. Toca **Run**. Debe salir *"Success. No rows returned"*.
-5. Comprueba: abre **Table Editor**. Deben aparecer `ajustes`, `jornadas`, `pedidos`, `pedido_items`, `productos` y `visitas`.
+5. Comprueba: abre **Table Editor**. Deben aparecer `ajustes`, `jornadas`, `pedidos`, `pedido_items`, `catalogo_web`, `visitas` (y las del panel: `insumos`, `ventas`, etc.).
 
 > Si sale un aviso de "destructive operation", es por las líneas `revoke`. Toca **Run this query** igual. No borra nada.
 
@@ -88,7 +90,7 @@ Cambia `TU-SITIO` por la dirección final. Cada link le dice a la base de dónde
 
 ## ¿De dónde vienen los pedidos? (por ahora)
 
-En Supabase → **Table Editor → resumen_por_origen** se ven las visitas, los pedidos, las ventas y la conversión de cada canal.
+En el panel → **Pedidos** → tarjeta "¿De dónde vienen los pedidos?".
 
 ## Lo que Sebas puede cambiar sin tocar código (Table Editor)
 
@@ -102,4 +104,4 @@ En Supabase → **Table Editor → resumen_por_origen** se ven las visitas, los 
 | Cambiar el cupo, el horario o los días por defecto | `ajustes`: `cupo_por_dia`, `abre_a`, `cierra_a` y `dias_servicio` (0 = domingo … 6 = sábado) |
 | Cobrar domicilio | `ajustes.domicilio` (en pesos; 0 = gratis) |
 | Poner la llave de transferencia | `ajustes.llave_transferencia` (ej. `Nequi 311 374 9498`) |
-| Cambiar un precio o pausar un producto | `productos.precio` y `productos.activo` |
+| Cambiar un precio o pausar un producto | En el panel: Menú (el precio de la web sale de ahí) |

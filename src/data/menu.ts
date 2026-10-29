@@ -1,5 +1,5 @@
 export type Producto = {
-  /** Debe coincidir con el id de la tabla public.productos */
+  /** Debe coincidir con el id de la tabla public.catalogo_web */
   id: string;
   nombre: string;
   descripcion: string;

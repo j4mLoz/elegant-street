@@ -22,9 +22,9 @@ Para probar con una base local: `supabase start` con la migración de `supabase/
 - `src/app/acciones.ts`: Server Actions `crearPedido` (zod + campo trampa) y `registrarVisita`
 - `src/components/Carrito.tsx`: carrito, formulario y confirmación con WhatsApp
 - `src/lib/atribucion.ts`: `?src=` guardado 7 días desde la primera visita
-- `src/data/menu.ts`: textos y fotos de los productos (el precio real viene de la tabla `productos`)
+- `src/data/menu.ts`: textos y fotos de los productos (el precio real viene del Menú del panel, vía la tabla `catalogo_web`)
 - `public/productos/*.jpg`: fotos. **Para cambiarlas, reemplaza el archivo con el mismo nombre.**
-- `supabase/migrations/…_pedidos_web.sql`: toda la base. La copia `SQL-PARA-PEGAR.sql` es para el SQL Editor.
+- `supabase/migrations/…_elegant_unificado.sql`: toda la base (web + panel). La copia `SQL-PARA-PEGAR-ELEGANT.sql` es para el SQL Editor. Guía completa: `ENTREGA-ELEGANT.md`.
 
 ## Desplegar
 Ver **[DESPLIEGUE-NETLIFY.md](DESPLIEGUE-NETLIFY.md)**.
