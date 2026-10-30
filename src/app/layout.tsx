@@ -22,7 +22,7 @@ const marker = Permanent_Marker({
 
 const titulo = "Elegant Street · Hamburguesas a domicilio en Unidad Siempre Verde";
 const descripcion =
-  "Street Carioca y Street Abacaxi a $30.000. Pide viernes, sábado y domingo desde las 4:00 p. m. y recíbela en tu apartamento.";
+  "Clásica, Doble, Street Carioca y Street Abacaxi desde $28.000. Pide viernes, sábado y domingo desde las 4:00 p. m. y recíbela en tu apartamento.";
 
 // Netlify define URL (dominio principal) al construir; SITIO_URL permite forzar otro
 const sitio = process.env.SITIO_URL || process.env.URL || "http://localhost:3200";

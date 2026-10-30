@@ -14,10 +14,23 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const estado = await obtenerEstado();
 
-  // Precio y disponibilidad salen de Supabase; si no responde, se usan los de respaldo
-  const precios: Record<string, number> = estado
+  // Si Supabase no responde, se usan los precios de respaldo
+  const respaldo: Record<string, number> = Object.fromEntries(
+    PRODUCTOS.map((p) => [p.id, p.precio]),
+  );
+  const deLaBase: Record<string, number> | null = estado
     ? Object.fromEntries(estado.productos.map((p) => [p.id, p.precio]))
-    : Object.fromEntries(PRODUCTOS.map((p) => [p.id, p.precio]));
+    : null;
+  // Precio y disponibilidad salen de Supabase. Los productos nuevos que la base aún no
+  // conoce (mostrarSinBase) se muestran igual, pero el servidor rechaza su pedido.
+  const precios: Record<string, number> = deLaBase
+    ? {
+        ...Object.fromEntries(
+          PRODUCTOS.filter((p) => p.mostrarSinBase).map((p) => [p.id, p.precio]),
+        ),
+        ...deLaBase,
+      }
+    : respaldo;
 
   return (
     <CarritoProvider precios={precios}>

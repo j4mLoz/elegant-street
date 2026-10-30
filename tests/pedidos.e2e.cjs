@@ -67,7 +67,8 @@ async function llenar(page, { nombre, tel, torre, apto, pago = "Efectivo", notas
     await page.goto(`${URL}/?src=ig`, { waitUntil: "networkidle" });
     await page.waitForTimeout(1200);
     await page.screenshot({ path: `${OUT}/01-hero-cerrado.png` });
-    check("cerrado: aviso en el hero", await page.getByText("Ahora estamos cerrados").first().isVisible());
+    // Según el día/hora de la prueba: "Ahora estamos cerrados" o "Hoy abrimos a las 4:00 p. m."
+    check("cerrado: aviso en el hero", await page.getByText(/Ahora estamos cerrados|Hoy abrimos a las/).first().isVisible());
     await page.locator("#menu").scrollIntoViewIfNeeded();
     await page.waitForTimeout(900);
     await page.screenshot({ path: `${OUT}/02-menu.png` });
@@ -267,6 +268,66 @@ async function llenar(page, { nombre, tel, torre, apto, pago = "Efectivo", notas
   {
     const r = await fetch(`${URL}/admin`);
     check("/admin ya no existe (404)", r.status === 404, `status ${r.status}`);
+  }
+
+  // ── 9. Productos Clásica ($28.000) y Doble ($33.000) ──
+  sql(`update public.jornadas set abierta = true, cupo = 100 where fecha = ${HOY};`);
+  {
+    const ctx = await nuevoContexto(browser);
+    const page = await ctx.newPage();
+    await page.goto(`${URL}/`, { waitUntil: "networkidle" });
+    await page.locator("#menu").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(900);
+    for (const [n, precio] of [["Clásica", "28.000"], ["Doble", "33.000"]]) {
+      const tarjeta = page.locator("article", { has: page.getByRole("heading", { name: n, exact: true }) });
+      check(`menú: ${n} con foto y precio $${precio}`,
+        (await tarjeta.locator("img").count()) === 1 && (await tarjeta.innerText()).includes(precio));
+    }
+    check("menú: 4 productos", (await page.locator("#menu article").count()) === 4);
+    await page.screenshot({ path: `${OUT}/13-menu-4-productos.png`, fullPage: false });
+
+    // El cliente intenta colar un precio manipulado en la petición: el servidor lo ignora
+    await page.route("**/*", async (route) => {
+      const req = route.request();
+      const body = req.postData();
+      if (req.method() === "POST" && body && body.includes('"id":"doble"')) {
+        return route.continue({ postData: body.replace('"id":"doble"', '"id":"doble","precio":1,"precio_unitario":1') });
+      }
+      return route.continue();
+    });
+    await agregar(page, "Clásica", 1);
+    await agregar(page, "Doble", 2);
+    await abrirCarrito(page);
+    await llenar(page, { nombre: "Camilo", tel: "3051112233", torre: "5", apto: "201" });
+    await page.getByRole("button", { name: "Hacer pedido" }).click();
+    await page.getByText("Recibimos tu pedido").waitFor({ timeout: 8000 });
+    const fila = sql(`select total, detalle from public.pedidos where cliente = 'Camilo'`);
+    check("Clásica x1 + Doble x2 = $94.000 (precio manipulado ignorado)", fila.startsWith("94000|"), fila);
+    const lineas = sql(`select string_agg(producto_id||':'||precio_unitario, ',' order by producto_id) from public.pedido_items pi join public.pedidos p on p.id = pi.pedido_id where p.cliente = 'Camilo'`);
+    check("precios guardados desde la base", lineas === "clasica:28000,doble:33000", lineas);
+    await page.screenshot({ path: `${OUT}/14-pedido-doble-clasica.png` });
+    await page.unroute("**/*");
+
+    // Producto no disponible en la base (como en producción antes del SQL): rechazo claro, sin pedido
+    sql(`update public.catalogo_web set activo = false where id = 'doble';`);
+    await page.goto(`${URL}/`, { waitUntil: "networkidle" });
+    await page.locator("#menu").scrollIntoViewIfNeeded();
+    await agregar(page, "Doble", 1);
+    await abrirCarrito(page);
+    await llenar(page, { nombre: "Dario", tel: "3052223344", torre: "6", apto: "302" });
+    const antes = sql(`select count(*) from public.pedidos`);
+    await page.getByRole("button", { name: "Hacer pedido" }).click();
+    await page.getByText(/no está disponible por ahora/).last().waitFor({ timeout: 8000 });
+    check("producto ausente en la base: aviso claro y no guarda", antes === sql(`select count(*) from public.pedidos`));
+    sql(`update public.catalogo_web set activo = true where id = 'doble';`);
+    await ctx.close();
+  }
+  {
+    // Directo a la función: precio enviado por el cliente no cuenta; id inventado se rechaza
+    const r1 = sql(`select (public.crear_pedido('Eva','3053334455','7','101','efectivo',null,'[{"id":"doble","cantidad":1,"precio":1}]'::jsonb))->>'total'`);
+    check("RPC: Doble con precio=1 cobra 33000", r1 === "33000", r1);
+    const r2 = sql(`select (public.crear_pedido('Eva','3053334456','7','101','efectivo',null,'[{"id":"triple","cantidad":1,"precio":1}]'::jsonb))->>'error'`);
+    check("RPC: producto inexistente se rechaza", r2 === "producto_invalido", r2);
   }
 
   // Pantalla de escritorio

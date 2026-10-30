@@ -36,3 +36,6 @@ Ver **[DESPLIEGUE-NETLIFY.md](DESPLIEGUE-NETLIFY.md)**.
   1. Página protegida de pedidos (login de Sebas) con cambio de estado y la tarjeta "¿De dónde vienen los pedidos?".
   2. Conexión con caja e inventario del panel de control.
   3. Anti-spam extra (Cloudflare Turnstile o límite por IP) si aparecen pedidos falsos.
+
+## Productos Clásica y Doble
+Agregados a la web. Para que se puedan pedir en producción hay que pegar `AGREGAR-PRODUCTOS-DOBLE-CLASICA.sql` en el SQL Editor de Supabase (idempotente). Mientras tanto la web los muestra, pero el servidor rechaza su pedido con un aviso claro y no guarda nada. Cuando el SQL esté aplicado, quitar `mostrarSinBase` en `src/data/menu.ts`.

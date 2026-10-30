@@ -116,7 +116,7 @@ export async function crearPedido(entrada: unknown): Promise<ResultadoPedido> {
       return {
         ok: false,
         error: "producto_invalido",
-        mensaje: "Uno de los productos ya no está disponible. Recarga la página.",
+        mensaje: "Uno de los productos no está disponible por ahora, así que no creamos tu pedido. Recarga la página o escríbenos por WhatsApp.",
       };
     case "datos_invalidos":
       return { ok: false, error: "datos_invalidos", mensaje: "Revisa los datos del pedido." };

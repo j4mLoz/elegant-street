@@ -10,9 +10,39 @@ export type Producto = {
   fotoAlt: string;
   /** Frase corta en letra de brocha */
   nota: string;
+  /**
+   * true = mientras la base no tenga el producto (falta pegar AGREGAR-PRODUCTOS-DOBLE-CLASICA.sql)
+   * la web lo muestra igual con el precio de respaldo, pero el servidor rechaza el pedido.
+   * Quitar este campo cuando el SQL ya esté aplicado en Supabase.
+   */
+  mostrarSinBase?: boolean;
 };
 
 export const PRODUCTOS: Producto[] = [
+  {
+    id: "clasica",
+    nombre: "Clásica",
+    descripcion:
+      "Pan brioche, lechuga, tomate, carne premium, queso cheddar, tocineta y salsa de la casa.",
+    precio: 28000,
+    foto: "/productos/clasica.jpg",
+    fotoAlt:
+      "Hamburguesa Clásica en pan brioche con lechuga, carne, queso cheddar y tocineta, sobre papel de Elegant Street",
+    nota: "la de siempre",
+    mostrarSinBase: true,
+  },
+  {
+    id: "doble",
+    nombre: "Doble",
+    descripcion:
+      "Pan brioche, lechuga, tomate, doble carne premium, doble queso cheddar, doble tocineta y salsa de la casa.",
+    precio: 33000,
+    foto: "/productos/doble.jpg",
+    fotoAlt:
+      "Hamburguesa Doble en pan brioche con dos carnes, doble queso cheddar y doble tocineta, con la caja de Elegant Street al fondo",
+    nota: "doble de todo",
+    mostrarSinBase: true,
+  },
   {
     id: "street-carioca",
     nombre: "Street Carioca",
@@ -22,7 +52,7 @@ export const PRODUCTOS: Producto[] = [
     foto: "/productos/street-carioca.jpg",
     fotoAlt:
       "Street Carioca: hamburguesa en pan brioche con lechuga, carne, queso cheddar y mermelada de tocineta",
-    nota: "la clásica",
+    nota: "con mermelada de tocineta",
   },
   {
     id: "street-abacaxi",

@@ -63,7 +63,7 @@ export default function Menu({ precios }: { precios: Record<string, number> }) {
             Elige tu <span className="texto-contorno tracking-[0.02em]">street</span>
           </h2>
           <p className="mt-4 max-w-xl font-body text-lg text-hueso/70">
-            Dos hamburguesas, cero relleno. Se arman al momento y llegan a tu apartamento.
+            Cuatro hamburguesas, cero relleno. Se arman al momento y llegan a tu apartamento.
           </p>
         </Revela>
 

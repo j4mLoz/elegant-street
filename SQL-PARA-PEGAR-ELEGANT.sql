@@ -116,7 +116,9 @@ create table if not exists public.catalogo_web (
 );
 insert into public.catalogo_web (id, nombre, precio, orden) values
   ('street-carioca', 'Street Carioca', 30000, 1),
-  ('street-abacaxi', 'Street Abacaxi', 30000, 2)
+  ('street-abacaxi', 'Street Abacaxi', 30000, 2),
+  ('clasica', 'Clásica', 28000, 3),
+  ('doble', 'Doble', 33000, 4)
 on conflict (id) do nothing;
 
 -- Conecta (una sola vez) cada producto de la web con una variante del menu.
@@ -127,7 +129,7 @@ declare
   v_var uuid;
 begin
   for c in select id, nombre, precio from public.catalogo_web
-           where variante_id is null and id in ('street-carioca', 'street-abacaxi') loop
+           where variante_id is null and id in ('street-carioca', 'street-abacaxi', 'clasica', 'doble') loop
     select p.id into v_prod from public.productos p where p.nombre = 'Hamburguesa' limit 1;
     if v_prod is null then
       insert into public.productos (nombre) values ('Hamburguesa') returning id into v_prod;
