@@ -1,10 +1,12 @@
 import Carrito from "@/components/Carrito";
+import Cartel from "@/components/Cartel";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Historia from "@/components/Historia";
 import Menu from "@/components/Menu";
 import RegistroVisita from "@/components/RegistroVisita";
 import { CarritoProvider } from "@/context/CarritoContext";
+import { CARTELES } from "@/data/carteles";
 import { PRODUCTOS } from "@/data/menu";
 import { obtenerEstado } from "@/lib/servicio";
 
@@ -37,7 +39,9 @@ export default async function Home() {
       <RegistroVisita />
       <main>
         <Hero estado={estado} />
+        <Cartel cartel={CARTELES.cuatro} fondo="carbon" />
         <Menu precios={precios} />
+        <Cartel cartel={CARTELES.carta} invertido fondo="carbon" />
         <Historia />
       </main>
       <Footer />
