@@ -16,13 +16,13 @@ function Tarjeta({
   return (
     <Revela retraso={indice * 120} className="h-full">
       <article className="group flex h-full flex-col overflow-hidden border border-hueso/15 bg-carbon">
-        <div className="relative aspect-square overflow-hidden md:aspect-[4/5] bg-grafito">
+        <div className="relative aspect-[4/3] overflow-hidden bg-grafito">
           <Image
             src={producto.foto}
             alt={producto.fotoAlt}
             fill
             sizes="(min-width: 768px) 45vw, 100vw"
-            className="object-cover object-[50%_40%] grayscale-[15%] transition-transform duration-700 group-hover:scale-[1.03]"
+            className="object-cover object-[50%_50%] transition-transform duration-700 group-hover:scale-[1.03]"
           />
           <span
             aria-hidden="true"

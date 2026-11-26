@@ -25,7 +25,7 @@ export const PRODUCTOS: Producto[] = [
     descripcion:
       "Pan brioche, lechuga, tomate, carne premium, queso cheddar, tocineta y salsa de la casa.",
     precio: 28000,
-    foto: "/productos/clasica.jpg",
+    foto: "/productos/clasica-v2.jpg",
     fotoAlt:
       "Hamburguesa Clásica en pan brioche con lechuga, carne, queso cheddar y tocineta, sobre papel de Elegant Street",
     nota: "la de siempre",
@@ -37,9 +37,9 @@ export const PRODUCTOS: Producto[] = [
     descripcion:
       "Pan brioche, lechuga, tomate, doble carne premium, doble queso cheddar, doble tocineta y salsa de la casa.",
     precio: 33000,
-    foto: "/productos/doble.jpg",
+    foto: "/productos/doble-v2.jpg",
     fotoAlt:
-      "Hamburguesa Doble en pan brioche con dos carnes, doble queso cheddar y doble tocineta, con la caja de Elegant Street al fondo",
+      "Hamburguesa Doble en pan brioche con dos carnes, doble queso cheddar derretido y doble tocineta, sobre papel de Elegant Street",
     nota: "doble de todo",
     mostrarSinBase: true,
   },
@@ -49,9 +49,9 @@ export const PRODUCTOS: Producto[] = [
     descripcion:
       "Pan brioche, lechuga, tomate, carne premium, mermelada de tocineta, queso cheddar, queso crema y salsa de la casa.",
     precio: 30000,
-    foto: "/productos/street-carioca.jpg",
+    foto: "/productos/street-carioca-v2.jpg",
     fotoAlt:
-      "Street Carioca: hamburguesa en pan brioche con lechuga, carne, queso cheddar y mermelada de tocineta",
+      "Street Carioca: hamburguesa en pan brioche con lechuga, carne, queso cheddar derretido y mermelada de tocineta",
     nota: "con mermelada de tocineta",
   },
   {
@@ -60,7 +60,7 @@ export const PRODUCTOS: Producto[] = [
     descripcion:
       "Pan brioche, lechuga, tomate, piña asada, carne premium, queso derretido, queso crema y salsa de la casa.",
     precio: 30000,
-    foto: "/productos/street-abacaxi.jpg",
+    foto: "/productos/street-abacaxi-v2.jpg",
     fotoAlt:
       "Street Abacaxi: hamburguesa en pan brioche con piña asada, queso derretido y queso crema",
     nota: "con piña asada",
