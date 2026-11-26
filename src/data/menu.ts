@@ -49,9 +49,9 @@ export const PRODUCTOS: Producto[] = [
     descripcion:
       "Pan brioche, lechuga, tomate, carne premium, mermelada de tocineta, queso cheddar, queso crema y salsa de la casa.",
     precio: 30000,
-    foto: "/productos/street-carioca-v2.jpg",
+    foto: "/productos/street-carioca-v3.jpg",
     fotoAlt:
-      "Street Carioca: hamburguesa en pan brioche con lechuga, carne, queso cheddar derretido y mermelada de tocineta",
+      "Street Carioca: hamburguesa en pan brioche con lechuga, carne, mermelada de tocineta y queso cheddar derretido que chorrea por los lados",
     nota: "con mermelada de tocineta",
   },
   {
